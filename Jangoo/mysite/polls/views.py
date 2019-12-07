@@ -1,7 +1,8 @@
 
 from django.views.generic.base import TemplateView
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
 # In[1]
 from . import predict
@@ -10,13 +11,16 @@ from . import Generate
 from . import Main
 from . import nlu
 from . import nlg
+import json
+from django.template import loader
 
 
 
 
-class Home(TemplateView):
+#class Home(TemplateView):
 
-    template_name = 'Home.html'
+    #template_name = 'Home.html'
+
 
 
 from .forms import NameForm
@@ -24,27 +28,38 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import ensure_csrf_cookie
 @ensure_csrf_cookie
 @csrf_exempt
-
-@csrf_protect
-def get_name(request):
-    reply = Main.sadia
-    print(reply)
-    console.log(reply)
-    # if this is a POST request we need to process the form data
-    form = NameForm()
+def get_response(request):
+    response = {'status': None}
     if request.method == 'POST':
-        form = NameForm(request.POST)
-        form.reply = Main.sadia
-        text = request.POST["textfield"]
-
-            # In[91]
-            #form.reply = "hello"
-        context = {
-            'form': form,
-            'reply': reply
+        reply = {
+            "message": "1",
         }
-    return render(request, 'Home.html', context)
+        reply = request.body.decode('utf-8')
+        print(reply)
+        #data = json.dump(reply)
+        data = json.load(reply)
+        message = data['message']
 
+        chat_response = reply
+        response['message'] = {'text': chat_response}
+        response['status'] = 'ok'
+    else:
+        response['error'] = 'no post data found'
+        return HttpResponse(
+            json.dumps(response),
+            content_type="application/json"
+        )
+def render_to_response(template_name, context=None, content_type=None, status=None, using=None):
+    """
+    Returns a HttpResponse whose content is filled with the result of calling
+    django.template.loader.render_to_string() with the passed arguments.
+    """
+    content = loader.render_to_string(template_name, context, using=using)
+    return HttpResponse(content, content_type, status)
+
+def home1(request, template_name="home1.html"):
+    context = {'title': 'hi'}
+    return render_to_response(template_name, context)
 
 
 

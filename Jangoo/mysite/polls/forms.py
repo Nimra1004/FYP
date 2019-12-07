@@ -6,4 +6,3 @@ class ReadOnlyText(forms.TextInput):
 
 class NameForm(forms.Form):
     Message = forms.CharField(widget=ReadOnlyText, label='message')
-    reply = forms.CharField(widget=ReadOnlyText, label='message')
